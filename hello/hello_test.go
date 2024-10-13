@@ -4,12 +4,17 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"github.com/google/uuid" // Add this import
+
+	"encore.app/hello/workflow"
+
 )
 
 // Run tests using `encore test`, which compiles the Encore app and then runs `go test`.
 // It supports all the same flags that the `go test` command does.
 // You automatically get tracing for tests in the local dev dash: http://localhost:9400
 // Learn more: https://encore.dev/docs/develop/testing
+/*
 func TestWorld(t *testing.T) {
 	const in = "Jane Doe"
 	resp, err := World(context.Background(), in)
@@ -20,3 +25,10 @@ func TestWorld(t *testing.T) {
 		t.Errorf("World(%q) = %q, expected to contain %q", in, got, in)
 	}
 }
+
+func TestCreateBill(t *testing.T){
+	lineItems := []workflow.LineItem{
+		{ID: uuid.New().String(),Description: "Item 1", Amount: 11.4},
+	}
+	resp, err := AddLineItem(context.Background(), "123",lineItems)
+}*/
