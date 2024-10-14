@@ -15,21 +15,154 @@ encore app create my-app-name --example=hello-world
 encore run
 temporal server start-dev --namespace default
 ```
-
-While `encore run` is running, open [http://localhost:9400/](http://localhost:9400/) to view Encore's [local developer dashboard](https://encore.dev/docs/observability/dev-dash).
-
-## Using the API
-
-To see that your app is running, you can ping the API.
-
+To run the tests
 ```bash
-curl http://localhost:4000/hello/World
+encore test ./...
+```
+
+## API Documentation
+
+### Postman Collection
+You can find the Postman collection for this API [here](./pavebank.postman_collection.json).
+
+### Endpoint for bill creation
+```
+POST /bill
+```
+Payload:
+```
+{
+    "customerID": "123" (required),
+    "currency": "USD" (optional)
+}
+```
+
+Response
+```
+{
+    "bill": {
+        "id": "709091cc-8c61-4ebd-90e6-dd1ca47dcd20",
+        "customerID": "123",
+        "start_date": "2024-10-14T14:53:28.983302Z",
+        "end_date": "2024-11-14T14:53:28.983302Z",
+        "currentCharges": null,
+        "currency": "USD",
+        "status": "open",
+        "totalCharges": 0
+    }
+}
+```
+
+### Endpoint for adding a line item to a bill
+```
+POST /lineitem
+```
+Payload:
+```
+{
+    "billID": "709091cc-8c61-4ebd-90e6-dd1ca47dcd20" (required),
+    "lineItem": {
+            "ID": "04fab9a5-557f-4ecb-8f4b-807556a8b2c3",
+            "Amount": 55.1,
+            "Currency": "USD",
+            "Timestamp": "2024-10-14T14:53:28.983302Z"       
+        } (required)
+}
+```
+
+Response
+```
+{
+    "bill": {
+        "id": "709091cc-8c61-4ebd-90e6-dd1ca47dcd20",
+        "customerID": "123",
+        "start_date": "2024-10-14T14:53:28.983302Z",
+        "end_date": "2024-11-14T14:53:28.983302Z",
+        "currentCharges": [
+            {
+                "id": "04fab9a5-557f-4ecb-8f4b-807556a8b2c3",
+                "description": "",
+                "amount": 55.1,
+                "timestamp": "2024-10-14T14:53:28.983302Z",
+                "currency": "USD",
+                "metadata": ""
+            }
+        ],
+        "currency": "USD",
+        "status": "open",
+        "totalCharges": 55.1
+    }
+}
+```
+
+### Endpoint for updating a bill
+```
+PATCH /bill/:billID
+```
+Payload:
+```
+{
+    "status": "closed" (required)
+}
+```
+
+Response
+```
+{
+    "bill": {
+        "id": "709091cc-8c61-4ebd-90e6-dd1ca47dcd20",
+        "customerID": "123",
+        "start_date": "2024-10-14T14:53:28.983302Z",
+        "end_date": "2024-11-14T14:53:28.983302Z",
+        "currentCharges": [
+            {
+                "id": "04fab9a5-557f-4ecb-8f4b-807556a8b2c3",
+                "description": "",
+                "amount": 55.1,
+                "timestamp": "2024-10-14T14:53:28.983302Z",
+                "currency": "USD",
+                "metadata": ""
+            }
+        ],
+        "currency": "USD",
+        "status": "open",
+        "totalCharges": 55.1
+    }
+}
+```
+
+### Endpoint for retrieving a bill
+```
+GET /bill/:billID
+```
+
+Response
+```
+{
+    "bill": {
+        "id": "709091cc-8c61-4ebd-90e6-dd1ca47dcd20",
+        "customerID": "123",
+        "start_date": "2024-10-14T14:53:28.983302Z",
+        "end_date": "2024-11-14T14:53:28.983302Z",
+        "currentCharges": [
+            {
+                "id": "04fab9a5-557f-4ecb-8f4b-807556a8b2c3",
+                "description": "",
+                "amount": 55.1,
+                "timestamp": "2024-10-14T14:53:28.983302Z",
+                "currency": "USD",
+                "metadata": ""
+            }
+        ],
+        "currency": "USD",
+        "status": "open",
+        "totalCharges": 55.1
+    }
+}
 ```
 
 ## Areas of improvement
 Functional
-- Store bill and line items in the database to increase reliability and performance. This would also allow more sophisticated querying and reporting capabilities such as filtering, sorting, grouping, paging and aggregations. Currently, the only way to retrieve a bill is by querying the workflow history. The implementation of the database would need to be considered mindfully to avoid mixing business logic of bill manipulation with database query logic, bill manipulation should be done in the workflow and database query logic should be done in the service layer in order to enjoy the benefits of Temporal.
-
 - Add significantly more support and abstractions for currency manipulation. This include support for floating point numbers, more currency options, more precise currency conversion rates, real time currency conversion rates, value markup etc.
 
 - Other billing related functionalities include support for recurring billing, proration, billing cycles, discount applications, late payment penalties etc.

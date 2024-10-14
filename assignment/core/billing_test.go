@@ -1,4 +1,4 @@
-package workflow
+package core
 
 import (
 	"time"
@@ -11,25 +11,25 @@ func TestLineItem_GetAmountByCurrency(t *testing.T) {
 	tests := []struct {
 		name           string
 		lineItem       LineItem
-		targetCurrency string
+		targetCurrency Currency
 		expected       float64
 	}{
 		{
 			name: "USD to GEL",
 			lineItem: LineItem{
 				Amount:   100,
-				Currency: "USD",
+				Currency: USD,
 			},
-			targetCurrency: "GEL",
+			targetCurrency: GEL,
 			expected:       270.27, // 100 USD = 270.27 GEL (approx.)
 		},
 		{
 			name: "GEL to USD",
 			lineItem: LineItem{
 				Amount:   270,
-				Currency: "GEL",
+				Currency: GEL,
 			},
-			targetCurrency: "USD",
+			targetCurrency: USD,
 			expected:       99.9, // 270 GEL = 99.9 USD (approx.)
 		},
 	}
@@ -56,12 +56,9 @@ func TestBillUpdate_Close(t *testing.T) {
 		EndDate:    time.Time{}, // Zero value
 		Status:     BillStatusOpen,
 	}
-
-	// Create an update to close the bill
-	update := BillUpdate{Status: BillStatusClosed}
 	
 	// Apply the update
-	bill.Update(update)
+	bill.Update(BillStatusClosed)
 
 	// Check if the status was updated correctly
 	if bill.Status != BillStatusClosed {
@@ -81,9 +78,13 @@ func TestAddLineItem(t *testing.T) {
 			Status: BillStatusClosed,
 		}
 
-		err := bill.addLineItem([]LineItem{
-			{ID: "1", Description: "Item 1", Amount: 11.4},
-		})
+		err := bill.AddLineItem(LineItem{
+			ID: "1", 
+			Description: "Item 1", 
+			Amount: 11.4,
+			Currency: USD,
+			Timestamp: time.Now(),
+		},)
 
 		assert.Error(t, err)
 		assert.Equal(t, "bill is closed, line items cannot be added", err.Error())
@@ -96,9 +97,9 @@ func TestAddLineItem(t *testing.T) {
 			CurrentCharges: []LineItem{{ID: "1", Description: "Existing Item", Amount: 10.0}},
 		}
 
-		err := bill.addLineItem([]LineItem{
-			{ID: "1", Description: "Duplicate Item", Amount: 15.0},
-		})
+		err := bill.AddLineItem(LineItem{
+			ID: "1", Description: "Duplicate Item", Amount: 15.0,
+		},)
 
 		assert.Error(t, err)
 		assert.Equal(t, "duplicate line item ID found", err.Error())
@@ -107,20 +108,19 @@ func TestAddLineItem(t *testing.T) {
 	t.Run("Successful Addition", func(t *testing.T) {
 		bill := &Bill{
 			Status:         BillStatusOpen,
-			Currency:       "USD",
-			CurrentCharges: []LineItem{{ID: "1", Description: "Existing Item", Amount: 10.0}},
+			Currency:       USD,
+			CurrentCharges: []LineItem{{ID: "1", Description: "Existing Item", Amount: 10.0, Timestamp: time.Now()}},
 			TotalCharges:   10.0,
 		}
 
-		newItems := []LineItem{
-			{ID: "2", Description: "New Item 1", Amount: 15.0, Currency: "USD"},
-			{ID: "3", Description: "New Item 2", Amount: 20.0, Currency: "USD"},
+		newItems := LineItem{
+			ID: "2", Description: "New Item 1", Amount: 15.0, Currency: "USD", Timestamp: time.Now(),
 		}
 
-		err := bill.addLineItem(newItems)
+		err := bill.AddLineItem(newItems)
 
 		assert.NoError(t, err)
-		assert.Len(t, bill.CurrentCharges, 3)
-		assert.Equal(t, 45.0, bill.TotalCharges)
+		assert.Len(t, bill.CurrentCharges, 2)
+		assert.Equal(t, 25.0, bill.TotalCharges)
 	})
 }

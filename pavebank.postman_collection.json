@@ -1,0 +1,152 @@
+{
+	"info": {
+		"_postman_id": "90cad7a3-e330-462b-8c47-a881777d802f",
+		"name": "pavebank",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "19302626"
+	},
+	"item": [
+		{
+			"name": "bill create",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let responseData = pm.response.json();",
+							"",
+							"// Extract the value you need from the response",
+							"let valueToStore = responseData.bill.id; // Replace 'key' with the actual key from your response",
+							"",
+							"// Set the value as a Postman variable",
+							"pm.environment.set(\"billUUID\", valueToStore); // Replace 'variableName' with your desired variable name"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"customerID\": \"123\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:4000/bill",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "4000",
+					"path": [
+						"bill"
+					],
+					"query": [
+						{
+							"key": "CustomerID",
+							"value": "123",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "lineitem crerate",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"billID\": \"{{billUUID}}\",\n    \"lineItem\" : \n        {\n            \"ID\": \"04fab9a5-557f-4ecb-8f4b-807556a8b2c3\",\n            \"Amount\": 55.1,\n            \"Currency\": \"USD\",\n            \"Timestamp\": \"2024-10-14T14:53:28.983302Z\"       \n        }\n    \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:4000/lineitem",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "4000",
+					"path": [
+						"lineitem"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query bill",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:4000/bill/{{billUUID}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "4000",
+					"path": [
+						"bill",
+						"{{billUUID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update bill",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"status\": \"closed\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:4000/bill/{{billUUID}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "4000",
+					"path": [
+						"bill",
+						"{{billUUID}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
